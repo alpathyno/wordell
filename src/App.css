@@ -1,0 +1,119 @@
+.game { text-align: center; font-family: sans-serif; }
+.papan { display: grid; gap: 6px; justify-content: center; margin-top: 24px; }
+.baris { display: grid; grid-template-columns: repeat(5, 60px); gap: 6px; }
+.kotak {
+  width: 60px; height: 60px;
+  border: 2px solid #2c3a55;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2rem; font-weight: bold; text-transform: uppercase;
+}
+/* warna disimpan sebagai variabel, dipakai oleh animasi flip */
+.kotak.hijau { --warna: #538d4e; }
+.kotak.kuning { --warna: #b59f3b; }
+.kotak.abu { --warna: #3a3a3c; }
+
+.kotak.hijau,
+.kotak.kuning,
+.kotak.abu {
+  animation: flip 0.6s ease both;
+  animation-delay: var(--delay);
+}
+
+@keyframes flip {
+  0% {
+    transform: scale(1);
+    background: transparent;
+    border-color: #2c3a55;
+    color: inherit;
+  }
+  40% {
+    transform: scale(1.15);
+    background: transparent;
+    border-color: #2c3a55;
+    color: inherit;
+  }
+  41% {
+    transform: scale(1.15);
+    background: var(--warna);
+    border-color: var(--warna);
+    color: white;
+  }
+  100% {
+    transform: scale(1);
+    background: var(--warna);
+    border-color: var(--warna);
+    color: white;
+  }
+}
+
+/* pop saat huruf diketik */
+.kotak.terisi { border-color: #555; animation: pop 0.12s; }
+@keyframes pop { 50% { transform: scale(1.12); } }
+
+/* goyang saat kata tidak valid */
+.baris.goyang { animation: goyang 0.4s; }
+@keyframes goyang {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(-6px); }
+  80% { transform: translateX(6px); }
+}
+.pesan { margin-top: 24px; font-size: 1.2rem; font-weight: bold; }
+
+.peringatan { height: 24px; margin: 12px 0 0; color: #c0392b; font-weight: bold; }
+.main-lagi {
+  margin-top: 12px; padding: 10px 20px; font-size: 1rem;
+  border: none; border-radius: 6px; background: #538d4e; color: white; cursor: pointer;
+}
+.keyboard { margin-top: 24px; display: grid; gap: 6px; justify-content: center; }
+.baris-keyboard { display: flex; gap: 6px; justify-content: center; }
+.tombol {
+  min-width: 36px; height: 52px; padding: 0 8px;
+  border: none; border-radius: 6px; background: #d3d6da;
+  font-weight: bold; font-size: 0.9rem; cursor: pointer;
+}
+.tombol.lebar { min-width: 60px; font-size: 0.75rem; }
+.tombol.hijau { background: #538d4e; color: white; }
+.tombol.kuning { background: #b59f3b; color: white; }
+.tombol.abu { background: #3a3a3c; color: white; }
+
+:root { color-scheme: dark; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(circle at 50% 0%, #16223f 0%, #0b1120 60%);
+  color: #e6edf7;
+}
+
+.game { padding: 32px 16px; }
+
+h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+}
+
+.kotak {
+  border-color: #2c3a55;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+}
+.kotak.terisi { border-color: #6b86bd; }
+
+.tombol { background: #1b2740; color: #cfd9ea; transition: background 0.15s; }
+.tombol:hover { background: #25355a; }
+
+.peringatan { color: #ff6b6b; }
+
+.game { font-family: "Space Grotesk", sans-serif; }
+
+h1 { font-weight: 700; }
+
+.kotak { font-family: "Space Mono", monospace; }
+
+/* tombol tidak otomatis mewarisi font, jadi perlu disetel manual */
+.tombol,
+.main-lagi { font-family: inherit; }

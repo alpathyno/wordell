@@ -1,16 +1,108 @@
-.game { text-align: center; font-family: sans-serif; }
-.papan { display: grid; gap: 6px; justify-content: center; margin-top: 24px; }
-.baris { display: grid; grid-template-columns: repeat(5, 60px); gap: 6px; }
-.kotak {
-  width: 60px; height: 60px;
-  border: 2px solid #2c3a55;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 2rem; font-weight: bold; text-transform: uppercase;
+/* ===== Tema gelap (default) ===== */
+:root {
+  color-scheme: dark;
+  --latar-atas: #16223f;
+  --latar-bawah: #0b1120;
+  --teks: #e6edf7;
+  --titik: rgba(130, 160, 220, 0.22);
+  --titik-glow: rgba(90, 210, 130, 0.95);
+  --panel: #0d1526;
+  --kotak: #111a2e;
+  --garis: #2c3a55;
+  --garis-isi: #6b86bd;
+  --tombol: #1b2740;
+  --tombol-hover: #25355a;
+  --peringatan: #ff6b6b;
+  --hijau: #538d4e;
+  --kuning: #b59f3b;
+  --abu: #3a3a3c;
 }
-/* warna disimpan sebagai variabel, dipakai oleh animasi flip */
-.kotak.hijau { --warna: #538d4e; }
-.kotak.kuning { --warna: #b59f3b; }
-.kotak.abu { --warna: #3a3a3c; }
+
+/* ===== Tema terang ===== */
+:root[data-tema="terang"] {
+  color-scheme: light;
+  --latar-atas: #ffffff;
+  --latar-bawah: #e6edf8;
+  --teks: #1b2740;
+  --titik: rgba(60, 80, 130, 0.2);
+  --titik-glow: rgba(40, 160, 90, 0.9);
+  --panel: #f1f5fb;
+  --kotak: #ffffff;
+  --garis: #c3cde0;
+  --garis-isi: #5b78b0;
+  --tombol: #dfe6f3;
+  --tombol-hover: #cdd7ea;
+  --peringatan: #c0392b;
+  --abu: #787c7e;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(
+    circle at 50% 0%,
+    var(--latar-atas) 0%,
+    var(--latar-bawah) 60%
+  );
+  color: var(--teks);
+}
+
+.game {
+  text-align: center;
+  font-family: "Space Grotesk", sans-serif;
+  padding: 32px 16px;
+}
+
+h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+}
+
+/* ===== Papan ===== */
+.papan {
+  display: grid;
+  gap: 6px;
+  justify-content: center;
+  width: fit-content;
+  margin: 24px auto 0;
+  padding: 14px;
+  background: var(--panel);
+  border-radius: 14px;
+}
+.baris {
+  display: grid;
+  grid-template-columns: repeat(5, 60px);
+  gap: 6px;
+}
+
+.kotak {
+  width: 60px;
+  height: 60px;
+  border: 2px solid var(--garis);
+  border-radius: 8px;
+  background: var(--kotak);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Space Mono", monospace;
+  font-size: 2rem;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+/* warna hasil tebakan, disimpan sebagai variabel untuk animasi flip */
+.kotak.hijau {
+  --warna: var(--hijau);
+}
+.kotak.kuning {
+  --warna: var(--kuning);
+}
+.kotak.abu {
+  --warna: var(--abu);
+}
 
 .kotak.hijau,
 .kotak.kuning,
@@ -22,14 +114,14 @@
 @keyframes flip {
   0% {
     transform: scale(1);
-    background: transparent;
-    border-color: #2c3a55;
+    background: var(--kotak);
+    border-color: var(--garis);
     color: inherit;
   }
   40% {
     transform: scale(1.15);
-    background: transparent;
-    border-color: #2c3a55;
+    background: var(--kotak);
+    border-color: var(--garis);
     color: inherit;
   }
   41% {
@@ -47,73 +139,398 @@
 }
 
 /* pop saat huruf diketik */
-.kotak.terisi { border-color: #555; animation: pop 0.12s; }
-@keyframes pop { 50% { transform: scale(1.12); } }
+.kotak.terisi {
+  border-color: var(--garis-isi);
+  animation: pop 0.12s;
+}
+@keyframes pop {
+  50% {
+    transform: scale(1.12);
+  }
+}
 
 /* goyang saat kata tidak valid */
-.baris.goyang { animation: goyang 0.4s; }
+.baris.goyang {
+  animation: goyang 0.4s;
+}
 @keyframes goyang {
-  0%, 100% { transform: translateX(0); }
-  20% { transform: translateX(-8px); }
-  40% { transform: translateX(8px); }
-  60% { transform: translateX(-6px); }
-  80% { transform: translateX(6px); }
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-8px);
+  }
+  40% {
+    transform: translateX(8px);
+  }
+  60% {
+    transform: translateX(-6px);
+  }
+  80% {
+    transform: translateX(6px);
+  }
 }
-.pesan { margin-top: 24px; font-size: 1.2rem; font-weight: bold; }
 
-.peringatan { height: 24px; margin: 12px 0 0; color: #c0392b; font-weight: bold; }
+/* ===== Pesan & tombol ===== */
+.pesan {
+  margin-top: 24px;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+.peringatan {
+  height: 24px;
+  margin: 12px 0 0;
+  color: var(--peringatan);
+  font-weight: bold;
+}
 .main-lagi {
-  margin-top: 12px; padding: 10px 20px; font-size: 1rem;
-  border: none; border-radius: 6px; background: #538d4e; color: white; cursor: pointer;
+  margin-top: 12px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  font-family: inherit;
+  border: none;
+  border-radius: 6px;
+  background: var(--hijau);
+  color: white;
+  cursor: pointer;
 }
-.keyboard { margin-top: 24px; display: grid; gap: 6px; justify-content: center; }
-.baris-keyboard { display: flex; gap: 6px; justify-content: center; }
+
+/* ===== Keyboard virtual ===== */
+.keyboard {
+  margin-top: 24px;
+  display: grid;
+  gap: 6px;
+  justify-content: center;
+}
+.baris-keyboard {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+}
 .tombol {
-  min-width: 36px; height: 52px; padding: 0 8px;
-  border: none; border-radius: 6px; background: #d3d6da;
-  font-weight: bold; font-size: 0.9rem; cursor: pointer;
+  min-width: 36px;
+  height: 52px;
+  padding: 0 8px;
+  border: none;
+  border-radius: 6px;
+  background: var(--tombol);
+  color: var(--teks);
+  font-family: inherit;
+  font-weight: bold;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.15s;
 }
-.tombol.lebar { min-width: 60px; font-size: 0.75rem; }
-.tombol.hijau { background: #538d4e; color: white; }
-.tombol.kuning { background: #b59f3b; color: white; }
-.tombol.abu { background: #3a3a3c; color: white; }
-
-:root { color-scheme: dark; }
-
-body {
-  margin: 0;
-  min-height: 100vh;
-  background: radial-gradient(circle at 50% 0%, #16223f 0%, #0b1120 60%);
-  color: #e6edf7;
+.tombol:hover {
+  background: var(--tombol-hover);
+}
+.tombol.lebar {
+  min-width: 60px;
+  font-size: 0.75rem;
+}
+.tombol.hijau {
+  background: var(--hijau);
+  color: white;
+}
+.tombol.kuning {
+  background: var(--kuning);
+  color: white;
+}
+.tombol.abu {
+  background: var(--abu);
+  color: white;
 }
 
-.game { padding: 32px 16px; }
+/* ===== Tombol ganti tema ===== */
+.toggle-tema,
+.tombol-statistik {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 1;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--garis);
+  border-radius: 10px;
+  background: var(--kotak);
+  font-size: 1.1rem;
+  cursor: pointer;
+}
 
-h1 {
-  margin: 0;
-  font-size: 1.5rem;
-  letter-spacing: 0.35em;
+/* ===== Latar dot-grid ===== */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: radial-gradient(
+    circle,
+    var(--titik) 1px,
+    transparent 1.5px
+  );
+  background-size: 28px 28px;
+}
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: radial-gradient(
+    circle,
+    var(--titik-glow) 1.2px,
+    transparent 1.8px
+  );
+  background-size: 28px 28px;
+  -webkit-mask-image: radial-gradient(
+    220px circle at var(--x, -999px) var(--y, -999px),
+    #000,
+    transparent
+  );
+  mask-image: radial-gradient(
+    220px circle at var(--x, -999px) var(--y, -999px),
+    #000,
+    transparent
+  );
+}
+
+.tombol-statistik {
+  right: 64px;
+}
+
+/* ===== Modal statistik ===== */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.55);
+}
+.modal {
+  position: relative;
+  width: 100%;
+  max-width: 380px;
+  padding: 24px;
+  border: 1px solid var(--garis);
+  border-radius: 16px;
+  background: var(--panel);
+  color: var(--teks);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+  animation: muncul 0.2s ease;
+}
+@keyframes muncul {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.97);
+  }
+}
+.modal h2 {
+  margin: 0 0 16px;
+  font-size: 1.1rem;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
 }
-
-.kotak {
-  border-color: #2c3a55;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.03);
+.modal h3 {
+  margin: 20px 0 8px;
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  opacity: 0.7;
 }
-.kotak.terisi { border-color: #6b86bd; }
+.tutup {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--teks);
+  font-size: 1rem;
+  cursor: pointer;
+}
+.tutup:hover {
+  background: var(--tombol);
+}
 
-.tombol { background: #1b2740; color: #cfd9ea; transition: background 0.15s; }
-.tombol:hover { background: #25355a; }
+.angka {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.angka div {
+  display: flex;
+  flex-direction: column;
+}
+.angka strong {
+  font-size: 1.8rem;
+}
+.angka span {
+  font-size: 0.7rem;
+  opacity: 0.7;
+}
 
-.peringatan { color: #ff6b6b; }
+.batang-baris {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  font-size: 0.85rem;
+}
+.batang-baris > span {
+  width: 12px;
+}
+.batang {
+  box-sizing: border-box;
+  min-width: 28px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: var(--abu);
+  color: white;
+  text-align: right;
+}
+.batang.ada {
+  background: var(--hijau);
+}
 
-.game { font-family: "Space Grotesk", sans-serif; }
+.modal .main-lagi {
+  width: 100%;
+  margin-top: 20px;
+}
 
-h1 { font-weight: 700; }
+.cuplikan {
+  margin: 16px 0 12px;
+  padding: 12px;
+  border-radius: 10px;
+  background: var(--kotak);
+  font-family: "Space Mono", monospace;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  text-align: center;
+  white-space: pre-wrap;
+}
+.bagikan {
+  width: 100%;
+  padding: 10px 20px;
+  border: 1px solid var(--garis-isi);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--teks);
+  font-family: inherit;
+  font-size: 1rem;
+  cursor: pointer;
+}
+.bagikan:hover {
+  background: var(--tombol-hover);
+}
+.status-salin {
+  height: 20px;
+  margin: 8px 0 0;
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
 
-.kotak { font-family: "Space Mono", monospace; }
+/* ===== Kartu samping (hanya di layar lebar) ===== */
+.samping {
+  display: none;
+}
 
-/* tombol tidak otomatis mewarisi font, jadi perlu disetel manual */
-.tombol,
-.main-lagi { font-family: inherit; }
+@media (min-width: 1180px) {
+  .samping {
+    display: block;
+    position: fixed;
+    top: 120px;
+    box-sizing: border-box;
+    width: 240px;
+    padding: 20px;
+    border: 1px solid var(--garis);
+    border-radius: 14px;
+    background: var(--panel);
+    text-align: left;
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+  .samping.kiri {
+    right: calc(50% + 300px);
+  }
+  .samping.kanan {
+    left: calc(50% + 300px);
+  }
+}
+
+.samping h2 {
+  margin: 0 0 12px;
+  font-size: 0.8rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+.samping ul {
+  margin: 0;
+  padding-left: 18px;
+}
+.samping li {
+  margin-bottom: 6px;
+}
+
+.contoh {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+.contoh span {
+  font-size: 0.8rem;
+  opacity: 0.85;
+}
+.contoh-kotak {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  color: white;
+  font-family: "Space Mono", monospace;
+  font-weight: bold;
+}
+.contoh-kotak.hijau {
+  background: var(--hijau);
+}
+.contoh-kotak.kuning {
+  background: var(--kuning);
+}
+.contoh-kotak.abu {
+  background: var(--abu);
+}
+
+.ringkas {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  text-align: center;
+}
+.ringkas strong {
+  display: block;
+  font-size: 1.6rem;
+}
+.ringkas span {
+  font-size: 0.7rem;
+  opacity: 0.7;
+}
+.semangat {
+  margin: 16px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--garis);
+}
+.terbaik {
+  margin: 6px 0 0;
+  font-size: 0.8rem;
+  opacity: 0.7;
+}

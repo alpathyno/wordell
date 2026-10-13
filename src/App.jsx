@@ -1,11 +1,17 @@
 import { useState, useEffect, useRef } from "react";
 import { DAFTAR_KATA, KATA_VALID } from "./kata";
-import { CaraBermain, StatistikRingkas } from "./Samping";
 import Statistik from "./Statistik";
+import { CaraBermain, StatistikRingkas } from "./Samping";
 import "./App.css";
 
 const PANJANG_KATA = 5;
 const MAKS_TEBAKAN = 6;
+
+// Pengaturan animasi flip. Samakan dengan CSS (animation: flip 0.6s ...)
+const JEDA_KOTAK = 300;      // ms jeda antar kotak
+const DURASI_ANIMASI = 600;  // ms durasi satu kotak
+const DURASI_FLIP = (PANJANG_KATA - 1) * JEDA_KOTAK + DURASI_ANIMASI + 100; // total satu baris
+
 const BARIS_KEYBOARD = [
   "QWERTYUIOP".split(""),
   "ASDFGHJKL".split(""),
@@ -80,11 +86,7 @@ function buatTeksBagikan(daftarTebakan, jawaban) {
   const menang = daftarTebakan[daftarTebakan.length - 1] === jawaban;
   const skor = menang ? daftarTebakan.length : "X";
   const grid = daftarTebakan
-    .map((kata) =>
-      nilai(kata, jawaban)
-        .map((warna) => EMOJI[warna])
-        .join(""),
-    )
+    .map((kata) => nilai(kata, jawaban).map((warna) => EMOJI[warna]).join(""))
     .join("\n");
   return `Tebak Kata ${skor}/${MAKS_TEBAKAN}\n\n${grid}`;
 }
@@ -92,32 +94,33 @@ function buatTeksBagikan(daftarTebakan, jawaban) {
 export default function App() {
   const [kataRahasia, setKataRahasia] = useState(pilihKataAcak);
   const [tebakan, setTebakan] = useState([]);
+  const [tampil, setTampil] = useState(0); // jumlah tebakan yang animasi flip-nya sudah selesai
   const [input, setInput] = useState("");
   const [peringatan, setPeringatan] = useState("");
   const [goyang, setGoyang] = useState(false);
   const [tema, setTema] = useState(
     () =>
       localStorage.getItem("tema") ??
-      (window.matchMedia("(prefers-color-scheme: light)").matches
-        ? "terang"
-        : "gelap"),
+      (window.matchMedia("(prefers-color-scheme: light)").matches ? "terang" : "gelap")
   );
   const [stats, setStats] = useState(muatStatistik);
   const [modal, setModal] = useState(false);
-  const timerModal = useRef(null);
+  const timerFlip = useRef([]);
 
   const menang = tebakan[tebakan.length - 1] === kataRahasia;
   const kalah = !menang && tebakan.length >= MAKS_TEBAKAN;
   const selesai = menang || kalah;
-  const warnaKeyboard = statusHuruf(tebakan, kataRahasia);
-  const teksBagikan = selesai ? buatTeksBagikan(tebakan, kataRahasia) : "";
+  // hasil baru boleh diumumkan setelah semua animasi selesai
+  const hasilTampil = selesai && tampil >= tebakan.length;
+  const warnaKeyboard = statusHuruf(tebakan.slice(0, tampil), kataRahasia);
+  const teksBagikan = hasilTampil ? buatTeksBagikan(tebakan, kataRahasia) : "";
 
   function goyangkan() {
     setGoyang(true);
     setTimeout(() => setGoyang(false), 500);
   }
 
-  // dipanggil sekali saat game berakhir
+  // dipanggil sekali saat game berakhir (setelah animasi selesai)
   function catatHasil(menangGame, jumlahTebakan) {
     setStats((prev) => {
       const baru = { ...prev, main: prev.main + 1 };
@@ -126,15 +129,14 @@ export default function App() {
         baru.streak = prev.streak + 1;
         baru.streakTerbaik = Math.max(prev.streakTerbaik, baru.streak);
         baru.distribusi = prev.distribusi.map((n, i) =>
-          i === jumlahTebakan - 1 ? n + 1 : n,
+          i === jumlahTebakan - 1 ? n + 1 : n
         );
       } else {
         baru.streak = 0;
       }
       return baru;
     });
-    // tunggu animasi flip selesai baru tampilkan modal
-    timerModal.current = setTimeout(() => setModal(true), 1800);
+    setModal(true);
   }
 
   // dipakai bersama oleh keyboard fisik dan keyboard virtual
@@ -151,13 +153,18 @@ export default function App() {
         goyangkan();
       } else {
         const daftarBaru = [...tebakan, input];
+        const menangSekarang = input === kataRahasia;
+        const gameBerakhir = menangSekarang || daftarBaru.length >= MAKS_TEBAKAN;
+
         setTebakan(daftarBaru);
         setInput("");
 
-        const menangSekarang = input === kataRahasia;
-        if (menangSekarang || daftarBaru.length >= MAKS_TEBAKAN) {
-          catatHasil(menangSekarang, daftarBaru.length);
-        }
+        // setelah animasi baris ini selesai, munculkan warna keyboard dan hasilnya
+        const id = setTimeout(() => {
+          setTampil((n) => Math.max(n, daftarBaru.length));
+          if (gameBerakhir) catatHasil(menangSekarang, daftarBaru.length);
+        }, DURASI_FLIP);
+        timerFlip.current.push(id);
       }
     } else if (tombol === "HAPUS") {
       setInput(input.slice(0, -1));
@@ -167,9 +174,11 @@ export default function App() {
   }
 
   function mainLagi() {
-    clearTimeout(timerModal.current);
+    timerFlip.current.forEach(clearTimeout);
+    timerFlip.current = [];
     setKataRahasia(pilihKataAcak());
     setTebakan([]);
+    setTampil(0);
     setInput("");
     setPeringatan("");
   }
@@ -235,8 +244,7 @@ export default function App() {
       <div className="papan">
         {Array.from({ length: MAKS_TEBAKAN }).map((_, baris) => {
           const sudahDikirim = baris < tebakan.length;
-          const kata =
-            tebakan[baris] ?? (baris === tebakan.length ? input : "");
+          const kata = tebakan[baris] ?? (baris === tebakan.length ? input : "");
           const warna = sudahDikirim ? nilai(kata, kataRahasia) : [];
 
           return (
@@ -249,7 +257,7 @@ export default function App() {
                   className={`kotak ${warna[kolom] ?? ""} ${
                     kata[kolom] && !sudahDikirim ? "terisi" : ""
                   }`}
-                  style={{ "--delay": `${kolom * 300}ms` }}
+                  style={{ "--delay": `${kolom * JEDA_KOTAK}ms` }}
                   key={kolom}
                 >
                   {kata[kolom] ?? ""}
@@ -262,13 +270,9 @@ export default function App() {
 
       <p className="peringatan">{peringatan}</p>
 
-      {menang && <p className="pesan">Kamu menang! 🎉</p>}
-      {kalah && <p className="pesan">Kalah. Jawabannya: {kataRahasia}</p>}
-      {selesai && (
-        <button className="main-lagi" onClick={mainLagi}>
-          Main Lagi
-        </button>
-      )}
+      {hasilTampil && menang && <p className="pesan">Kamu menang! 🎉</p>}
+      {hasilTampil && kalah && <p className="pesan">Kalah. Jawabannya: {kataRahasia}</p>}
+      {hasilTampil && <button className="main-lagi" onClick={mainLagi}>Main Lagi</button>}
 
       <div className="keyboard">
         {BARIS_KEYBOARD.map((baris, i) => (
@@ -291,7 +295,7 @@ export default function App() {
         <Statistik
           stats={stats}
           tutup={() => setModal(false)}
-          selesai={selesai}
+          selesai={hasilTampil}
           mainLagi={mainLagi}
           teksBagikan={teksBagikan}
         />
